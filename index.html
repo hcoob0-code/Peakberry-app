@@ -1749,10 +1749,10 @@ canvas { max-width: 100%; }
 <!-- ══ 기본관리 ══ -->
 <div class="sec" id="sec-settings">
 
-  <!-- 제어 패널 이름 편집 -->
+  <!-- 메인 제어 패널 편집 -->
   <div class="settings-accordion" id="acc-sfnames">
     <div class="settings-acc-hdr" onclick="toggleAcc('sfnames')">
-      <span class="settings-acc-title">제어 패널 이름 편집</span>
+      <span class="settings-acc-title">메인 제어 패널 편집</span>
       <span class="settings-acc-arrow" id="acc-arrow-sfnames">▼</span>
     </div>
     <div class="settings-acc-body" id="acc-body-sfnames">
@@ -1760,18 +1760,40 @@ canvas { max-width: 100%; }
         <div id="sfnames-editor"></div>
         <style>#sfnames-editor input::placeholder{color:var(--text-tertiary);opacity:1;}</style>
         <div style="margin-top:12px;">
-          <!-- 저장됨 버튼 (기본 보임) -->
           <button id="sfnames-done-btn" disabled
             style="width:100%;padding:11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:700;background:var(--bg);color:var(--text-tertiary);border:1px solid var(--border);border-radius:var(--radius-md);cursor:default;">저장됨</button>
-          <!-- 취소/저장 버튼 (편집 중에만 보임, 한 줄 2개) -->
           <div id="sfnames-edit-btns" style="display:none;gap:8px;margin-top:8px;">
             <button id="sfnames-cancel-btn" onclick="sfNamesCancel()"
               style="flex:1;padding:11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:700;background:var(--bg);color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;">취소</button>
             <button id="sfnames-save-btn" onclick="sfNamesSave()"
               style="flex:1;padding:11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:700;background:var(--text-primary);color:white;border:none;border-radius:var(--radius-md);cursor:pointer;">저장</button>
           </div>
-          <!-- 초기화 버튼 -->
           <button onclick="sfNamesReset()" style="width:100%;margin-top:8px;padding:9px;font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;background:transparent;color:var(--text-tertiary);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;">이름 초기화</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 육묘 제어 패널 편집 -->
+  <div class="settings-accordion" id="acc-sf2names">
+    <div class="settings-acc-hdr" onclick="toggleAcc('sf2names');sf2NamesRender();">
+      <span class="settings-acc-title">육묘 제어 패널 편집</span>
+      <span class="settings-acc-arrow" id="acc-arrow-sf2names">▼</span>
+    </div>
+    <div class="settings-acc-body" id="acc-body-sf2names">
+      <div class="nm-flat" style="padding:14px 16px;margin-bottom:4px;">
+        <div id="sf2names-editor"></div>
+        <style>#sf2names-editor input::placeholder{color:var(--text-tertiary);opacity:1;}</style>
+        <div style="margin-top:12px;">
+          <button id="sf2names-done-btn" disabled
+            style="width:100%;padding:11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:700;background:var(--bg);color:var(--text-tertiary);border:1px solid var(--border);border-radius:var(--radius-md);cursor:default;">저장됨</button>
+          <div id="sf2names-edit-btns" style="display:none;gap:8px;margin-top:8px;">
+            <button onclick="sf2NamesCancel()"
+              style="flex:1;padding:11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:700;background:var(--bg);color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;">취소</button>
+            <button onclick="sf2NamesSave()"
+              style="flex:1;padding:11px;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:700;background:var(--text-primary);color:white;border:none;border-radius:var(--radius-md);cursor:pointer;">저장</button>
+          </div>
+          <button onclick="sf2NamesReset()" style="width:100%;margin-top:8px;padding:9px;font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;background:transparent;color:var(--text-tertiary);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;">이름 초기화</button>
         </div>
       </div>
     </div>
@@ -3534,7 +3556,7 @@ function showTab(t){
   try{localStorage.setItem('pb8_active_tab',t);}catch(e){}
   if(t==='prices')try{renderPricesTab();}catch(e){console.error(e);}
   if(t==='loan')try{renderLoanList();}catch(e){console.error(e);}
-  if(t==='settings'){try{renderSettings();restoreAccState();if(typeof sfNamesRender==='function')sfNamesRender();}catch(e){console.error(e);}}
+  if(t==='settings'){try{renderSettings();restoreAccState();if(typeof sfNamesRender==='function')sfNamesRender();if(typeof sf2NamesRender==='function')sf2NamesRender();}catch(e){console.error(e);}}
   if(t==='income'||t==='expense')try{renderIncExp();renderIncExpStats();}catch(e){console.error(e);}
   if(t==='seedling-tab')try{/* merged into smartfarm2 */}catch(e){}
   if(t==='smartfarm')try{renderSmartfarmTab();}catch(e){console.error(e);}
@@ -7769,48 +7791,123 @@ function sfNamesRender() {
   if (!container) return;
   var names = sfGetNames();
   var html = '';
-
-  function renderSection(title, zoneDefs) {
-    html += '<div style="font-size:10px;font-weight:700;color:var(--text-tertiary);letter-spacing:1px;margin:14px 0 8px;text-transform:uppercase;">'+title+'</div>';
-    zoneDefs.forEach(function(z) {
-      var zoneName = names[z.key+'_name'] || z.defaultName;
-      var isSavedZone = !!names[z.key+'_name'];
-      html += '<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">';
-      html += '<div style="font-size:10px;font-weight:700;color:var(--text-tertiary);margin-bottom:5px;">'+zoneName+'</div>';
-      html += '<input type="text" id="sfname-zone-'+z.key+'"'
-            + ' value="'+(isSavedZone ? zoneName : '')+'"'
-            + ' placeholder="'+z.defaultName+'"'
-            + ' data-saved="'+(isSavedZone ? encodeURIComponent(zoneName) : '')+'"'
+  SF_ZONE_DEFS.forEach(function(z) {
+    var zoneName = names[z.key+'_name'] || z.defaultName;
+    var isSavedZone = !!names[z.key+'_name'];
+    html += '<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">';
+    html += '<div style="font-size:10px;font-weight:700;color:var(--text-tertiary);margin-bottom:5px;">'+zoneName+'</div>';
+    html += '<input type="text" id="sfname-zone-'+z.key+'"'
+          + ' value="'+(isSavedZone ? zoneName : '')+'"'
+          + ' placeholder="'+z.defaultName+'"'
+          + ' data-saved="'+(isSavedZone ? encodeURIComponent(zoneName) : '')+'"'
+          + ' onfocus="sfNameFocus(this)" oninput="sfNameInput(this)"'
+          + ' style="display:block;width:100%;box-sizing:border-box;padding:9px 12px;font-size:13px;font-family:\'Noto Sans KR\',sans-serif;'
+          + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);'
+          + 'color:var(--text-tertiary);margin-bottom:10px;">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">';
+    z.switches.forEach(function(sw, si) {
+      var swLabel = names[sw.id+'_label'] || sw.defaultLabel || ('스위치 '+(si+1));
+      var isSavedSw = !!names[sw.id+'_label'];
+      var ph = sw.defaultLabel || ('스위치 '+(si+1));
+      html += '<div>'
+            + '<div style="font-size:9px;font-weight:600;color:var(--text-tertiary);margin-bottom:3px;">'+ph+'</div>'
+            + '<input type="text" id="sfname-sw-'+sw.id+'"'
+            + ' value="'+(isSavedSw ? swLabel : '')+'"'
+            + ' placeholder="'+ph+'"'
+            + ' data-saved="'+(isSavedSw ? encodeURIComponent(swLabel) : '')+'"'
             + ' onfocus="sfNameFocus(this)" oninput="sfNameInput(this)"'
-            + ' style="display:block;width:100%;box-sizing:border-box;padding:9px 12px;font-size:13px;font-family:\'Noto Sans KR\',sans-serif;'
-            + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);'
-            + 'color:var(--text-tertiary);margin-bottom:10px;">';
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-      z.switches.forEach(function(sw, si) {
-        var swLabel = names[sw.id+'_label'] || sw.defaultLabel || ('스위치 '+(si+1));
-        var isSavedSw = !!names[sw.id+'_label'];
-        var ph = sw.defaultLabel || ('스위치 '+(si+1));
-        html += '<div>'
-              + '<div style="font-size:9px;font-weight:600;color:var(--text-tertiary);margin-bottom:3px;">'+ph+'</div>'
-              + '<input type="text" id="sfname-sw-'+sw.id+'"'
-              + ' value="'+(isSavedSw ? swLabel : '')+'"'
-              + ' placeholder="'+ph+'"'
-              + ' data-saved="'+(isSavedSw ? encodeURIComponent(swLabel) : '')+'"'
-              + ' onfocus="sfNameFocus(this)" oninput="sfNameInput(this)"'
-              + ' style="width:100%;box-sizing:border-box;padding:8px 10px;font-size:12px;font-family:\'Noto Sans KR\',sans-serif;'
-              + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);'
-              + 'color:var(--text-tertiary);">'
-              + '</div>';
-      });
-      html += '</div></div>';
+            + ' style="width:100%;box-sizing:border-box;padding:8px 6px;font-size:11px;font-family:\'Noto Sans KR\',sans-serif;'
+            + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);'
+            + 'color:var(--text-tertiary);">'
+            + '</div>';
     });
-  }
-
-  renderSection('메인 탭', SF_ZONE_DEFS);
-  renderSection('육묘 탭', SF2_ZONE_DEFS);
-
+    html += '</div></div>';
+  });
   container.innerHTML = html;
   sfNamesBtnReset();
+}
+
+function sf2NamesRender() {
+  var container = document.getElementById('sf2names-editor');
+  if (!container) return;
+  var names = sfGetNames();
+  var html = '';
+  SF2_ZONE_DEFS.forEach(function(z) {
+    var zoneName = names[z.key+'_name'] || z.defaultName;
+    var isSavedZone = !!names[z.key+'_name'];
+    html += '<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">';
+    html += '<div style="font-size:10px;font-weight:700;color:var(--text-tertiary);margin-bottom:5px;">'+zoneName+'</div>';
+    html += '<input type="text" id="sfname-zone-'+z.key+'"'
+          + ' value="'+(isSavedZone ? zoneName : '')+'"'
+          + ' placeholder="'+z.defaultName+'"'
+          + ' data-saved="'+(isSavedZone ? encodeURIComponent(zoneName) : '')+'"'
+          + ' onfocus="sf2NameFocus(this)" oninput="sf2NameInput(this)"'
+          + ' style="display:block;width:100%;box-sizing:border-box;padding:9px 12px;font-size:13px;font-family:\'Noto Sans KR\',sans-serif;'
+          + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);'
+          + 'color:var(--text-tertiary);margin-bottom:10px;">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">';
+    z.switches.forEach(function(sw, si) {
+      var swLabel = names[sw.id+'_label'] || sw.defaultLabel || ('스위치 '+(si+1));
+      var isSavedSw = !!names[sw.id+'_label'];
+      var ph = sw.defaultLabel || ('스위치 '+(si+1));
+      html += '<div>'
+            + '<div style="font-size:9px;font-weight:600;color:var(--text-tertiary);margin-bottom:3px;">'+ph+'</div>'
+            + '<input type="text" id="sfname-sw-'+sw.id+'"'
+            + ' value="'+(isSavedSw ? swLabel : '')+'"'
+            + ' placeholder="'+ph+'"'
+            + ' data-saved="'+(isSavedSw ? encodeURIComponent(swLabel) : '')+'"'
+            + ' onfocus="sf2NameFocus(this)" oninput="sf2NameInput(this)"'
+            + ' style="width:100%;box-sizing:border-box;padding:8px 6px;font-size:11px;font-family:\'Noto Sans KR\',sans-serif;'
+            + 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);'
+            + 'color:var(--text-tertiary);">'
+            + '</div>';
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+  sf2NamesBtnReset();
+}
+
+function sf2NameFocus(el) {
+  if (el.style.color === 'var(--text-tertiary)' || el.style.color.includes('tertiary')) {
+    el.value = ''; el.style.color = 'var(--text-primary)';
+    sf2NamesShowEditBtns();
+  }
+}
+function sf2NameInput(el) { el.style.color = 'var(--text-primary)'; sf2NamesShowEditBtns(); }
+function sf2NamesShowEditBtns() {
+  var e = document.getElementById('sf2names-edit-btns'); var d = document.getElementById('sf2names-done-btn');
+  if (e) e.style.display='flex'; if (d) d.style.display='none';
+}
+function sf2NamesBtnReset() {
+  var e = document.getElementById('sf2names-edit-btns'); var d = document.getElementById('sf2names-done-btn');
+  if (e) e.style.display='none'; if (d) d.style.display='block';
+}
+function sf2NamesCancel() { sf2NamesRender(); }
+function sf2NamesReset() {
+  if (!confirm('육묘 패널 이름을 기본값으로 초기화할까요?')) return;
+  var names = sfGetNames();
+  SF2_ZONE_DEFS.forEach(function(z) {
+    delete names[z.key+'_name'];
+    z.switches.forEach(function(sw){ delete names[sw.id+'_label']; });
+  });
+  try { localStorage.setItem('pb8_sf_names', JSON.stringify(names)); } catch(e) {}
+  sf2NamesRender();
+  if (typeof showSaveToast === 'function') showSaveToast('이름이 초기화되었습니다');
+}
+function sf2NamesSave() {
+  var names = sfGetNames();
+  SF2_ZONE_DEFS.forEach(function(z) {
+    var zEl = document.getElementById('sfname-zone-'+z.key);
+    if (zEl) { var v = zEl.value.trim(); if (v) names[z.key+'_name'] = v; else delete names[z.key+'_name']; }
+    z.switches.forEach(function(sw) {
+      var sEl = document.getElementById('sfname-sw-'+sw.id);
+      if (sEl) { var v = sEl.value.trim(); if (v) names[sw.id+'_label'] = v; else delete names[sw.id+'_label']; }
+    });
+  });
+  try { localStorage.setItem('pb8_sf_names', JSON.stringify(names)); } catch(e) {}
+  sf2NamesRender();
+  if (typeof showSaveToast === 'function') showSaveToast('이름이 저장되었습니다');
 }
 
 // input에 포커스 → 저장된 값이면 지우고 검정색으로
@@ -7845,21 +7942,25 @@ function sfNamesCancel() {
 }
 
 function sfNamesReset() {
-  if (!confirm('모든 그룹/스위치 이름을 기본값으로 초기화할까요?')) return;
-  try { localStorage.removeItem('pb8_sf_names'); } catch(e) {}
+  if (!confirm('메인 제어 패널 이름을 기본값으로 초기화할까요?')) return;
+  var names = sfGetNames();
+  SF_ZONE_DEFS.forEach(function(z) {
+    delete names[z.key+'_name'];
+    z.switches.forEach(function(sw){ delete names[sw.id+'_label']; });
+  });
+  try { localStorage.setItem('pb8_sf_names', JSON.stringify(names)); } catch(e) {}
   sfNamesRender();
   if (typeof showSaveToast === 'function') showSaveToast('이름이 초기화되었습니다');
 }
 
 function sfNamesSave() {
-  var names = {};
-  var allZones = SF_ZONE_DEFS.concat(SF2_ZONE_DEFS);
-  allZones.forEach(function(z) {
+  var names = sfGetNames();
+  SF_ZONE_DEFS.forEach(function(z) {
     var zEl = document.getElementById('sfname-zone-'+z.key);
-    if (zEl) { var v = zEl.value.trim(); if (v) names[z.key+'_name'] = v; }
+    if (zEl) { var v = zEl.value.trim(); if (v) names[z.key+'_name'] = v; else delete names[z.key+'_name']; }
     z.switches.forEach(function(sw) {
       var sEl = document.getElementById('sfname-sw-'+sw.id);
-      if (sEl) { var v = sEl.value.trim(); if (v) names[sw.id+'_label'] = v; }
+      if (sEl) { var v = sEl.value.trim(); if (v) names[sw.id+'_label'] = v; else delete names[sw.id+'_label']; }
     });
   });
   try { localStorage.setItem('pb8_sf_names', JSON.stringify(names)); } catch(e) {}
@@ -8017,23 +8118,49 @@ async function notifRequestPermission() {
       showAlert('알림 권한이 거부되었습니다.\niOS 설정 → Safari → 알림에서 허용해 주세요.');
       return;
     }
-    var token = await _fcmMessaging.getToken({
-      vapidKey: 'BN_jcVr2tbvCDTL12ems7PITt9TDruRn4zeS1CoLMVcFtrOBBv3KwcudssmS_cWmGji3mdk_EG_whHE5tPXF-Go',
-      serviceWorkerRegistration: await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js')
-    });
+    // Service Worker 먼저 수동 등록 시도
+    var swReg = null;
+    try {
+      if ('serviceWorker' in navigator) {
+        swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        await navigator.serviceWorker.ready;
+      }
+    } catch(swErr) {
+      console.warn('SW 등록 실패 (무시됨):', swErr);
+    }
+
+    var tokenOpts = { vapidKey: 'BN_jcVr2tbvCDTL12ems7PITt9TDruRn4zeS1CoLMVcFtrOBBv3KwcudssmS_cWmGji3mdk_EG_whHE5tPXF-Go' };
+    if (swReg) tokenOpts.serviceWorkerRegistration = swReg;
+
+    var token = null;
+    try {
+      token = await _fcmMessaging.getToken(tokenOpts);
+    } catch(tokenErr) {
+      console.warn('FCM 토큰 발급 실패:', tokenErr);
+      // iOS PWA 제한으로 토큰 발급 불가 — 앱 내 알림만 사용
+      showSaveToast('알림 권한이 허용되었습니다 (앱 내 알림만 지원)');
+      notifUpdatePermissionUI();
+      return;
+    }
+
     if (token) {
       _fcmToken = token;
       localStorage.setItem('pb8_fcm_token', token);
-      // Firebase DB에 토큰 저장 (농장별)
-      if (typeof window.saveToFirebase === 'function') {
-        window.saveToFirebase('pb8_fcm_token', token);
-      }
+      // Firebase DB에 토큰 저장
+      var DB_URL = 'https://peakberry-default-rtdb.firebaseio.com';
+      var API_KEY = 'AIzaSyC0Zc4seMa9YvG70QUgFuczREPdNoof2cU';
+      fetch(DB_URL + '/notifications/peakberry.json?key=' + API_KEY, {
+        method: 'PATCH',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ fcmToken: token, updatedAt: Date.now() })
+      }).catch(function(){});
+      notifSaveSchedulesToFirebase();
       notifUpdatePermissionUI();
       showSaveToast('알림이 활성화되었습니다');
     }
   } catch(e){
-    console.error('FCM 토큰 오류:', e);
-    showAlert('알림 설정 중 오류가 발생했습니다.\n' + e.message);
+    console.warn('알림 설정 오류 (무시됨):', e);
+    showSaveToast('알림 설정을 완료할 수 없습니다. 앱 내 알림은 작동합니다.');
   }
 }
 
@@ -8140,22 +8267,44 @@ function notifToggleDay(id, day) {
   if (idx >= 0) sch.days.splice(idx, 1);
   else sch.days.push(day);
   saveNotifSchedule(id, sch);
+  notifSaveSchedulesToFirebase();
   renderNotifTabSettings();
 }
 function notifSaveHour(id, val) {
   var sch = getNotifSchedule(id);
   sch.hour = parseInt(val);
   saveNotifSchedule(id, sch);
+  notifSaveSchedulesToFirebase();
 }
 
 function notifToggleItem(itemId, val) {
   var s = getNotifSettings();
   s[itemId] = val;
   saveNotifSettings(s);
-  renderNotifTabSettings(); // 리렌더로 토글 색상 업데이트
+  notifSaveSchedulesToFirebase();
+  renderNotifTabSettings();
 }
 
-// 포그라운드 토스트 알림
+// 알림 스케줄을 Firebase DB에 저장
+function notifSaveSchedulesToFirebase() {
+  var token = localStorage.getItem('pb8_fcm_token');
+  if (!token) return;
+  var DB_URL = 'https://peakberry-default-rtdb.firebaseio.com';
+  var API_KEY = 'AIzaSyC0Zc4seMa9YvG70QUgFuczREPdNoof2cU';
+  var reminders = ['seedling_remind','income_remind','expense_remind'];
+  var data = { fcmToken: token };
+  reminders.forEach(function(id) {
+    data[id] = {
+      enabled: isNotifEnabled(id),
+      schedule: getNotifSchedule(id)
+    };
+  });
+  fetch(DB_URL + '/notifications/peakberry.json?key=' + API_KEY, {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).catch(function(){});
+}
 function showNotifToast(title, body) {
   var toast = document.createElement('div');
   toast.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,44px) + 10px);left:16px;right:16px;z-index:99999;'
