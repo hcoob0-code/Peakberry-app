@@ -1003,6 +1003,7 @@ canvas { max-width: 100%; }
     <select id="inc-month-year-sel" onchange="renderIncExp()" style="display:none;flex-shrink:0;padding:6px 10px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:50px;appearance:none;-webkit-appearance:none;" id-note="month-year"></select><select id="inc-month-picker" onchange="renderIncExp()" style="display:none;flex-shrink:0;padding:6px 10px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:50px;appearance:none;-webkit-appearance:none;" id-note="month-sel"></select>
     <select id="inc-year-picker" onchange="renderIncExp()" style="display:none;flex-shrink:0;padding:6px 10px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:50px;appearance:none;-webkit-appearance:none;" id-note="year-sel"></select>
     <div style="flex:1;"></div>
+    <button class="top-bar-btn" onclick="openPriceModal()" style="color:var(--teal);font-weight:700;">시세 보기</button>
     <div class="top-bar-divider"></div>
     <button class="top-bar-btn" onclick="expandAll('income')">All ▼</button>
     <button class="top-bar-btn" onclick="collapseAll('income')">All ▲</button>
@@ -1053,7 +1054,7 @@ canvas { max-width: 100%; }
 </div>
 
 <!-- ══ 시세 ══ -->
-<div class="sec" id="sec-prices">
+<div class="sec" id="sec-prices" style="display:none!important;">
   <!-- 날짜별 시세 + 그래프 한 화면에 -->
   <div style="display:flex;align-items:center;gap:8px;margin-top:14px;margin-bottom:8px;">
     <input type="date" id="priceDate" onchange="renderPriceDateView()" style="flex:1;padding:7px 10px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text-primary);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);outline:none;">
@@ -2101,7 +2102,7 @@ canvas { max-width: 100%; }
 
   <div class="settings-accordion" id="acc-delrange">
     <div class="settings-acc-hdr" onclick="toggleAcc('delrange')">
-      <span class="settings-acc-title">데이터 기간 삭제</span>
+      <span class="settings-acc-title">데이터 삭제</span>
       <span class="settings-acc-arrow" id="acc-arrow-delrange">▼</span>
     </div>
     <div class="settings-acc-body" id="acc-body-delrange">
@@ -2206,6 +2207,42 @@ canvas { max-width: 100%; }
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="modal-cancel" onclick="closeIrrEditModal()">취소</button>
       <button class="modal-save" onclick="irrSaveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 시세 팝업 모달 -->
+<div id="priceModal" style="display:none;position:fixed;inset:0;background:rgba(26,28,35,0.45);z-index:600;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);" onclick="if(event.target.id==='priceModal')closePriceModal()">
+  <div style="background:rgba(255,255,255,0.97);border-radius:22px 22px 0 0;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--glass-border);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:17px;font-weight:700;">시세 그래프</div>
+      <button onclick="closePriceModal()" style="font-size:20px;background:none;border:none;cursor:pointer;color:var(--text-tertiary);padding:4px 8px;">✕</button>
+    </div>
+
+    <!-- 시세 그래프 -->
+    <div class="nm-flat" style="padding:10px 14px;margin-bottom:8px;" id="price-chart-card">
+      <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="date" id="pr-from" style="padding:5px 8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:50px;color:var(--text-primary);flex:1;min-width:0;">
+        <span style="font-size:11px;color:var(--text-tertiary);flex-shrink:0;">~</span>
+        <input type="date" id="pr-to" style="padding:5px 8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:50px;color:var(--text-primary);flex:1;min-width:0;">
+        <button onclick="renderPriceChart()" style="padding:5px 12px;font-size:11px;font-family:'Noto Sans KR',sans-serif;font-weight:600;background:var(--text-primary);color:white;border:none;border-radius:50px;cursor:pointer;flex-shrink:0;">조회</button>
+        <button onclick="toggleCompare()" id="btn-compare" style="padding:5px 10px;font-size:11px;font-family:'Noto Sans KR',sans-serif;font-weight:500;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border);border-radius:50px;cursor:pointer;flex-shrink:0;">비교</button>
+      </div>
+      <div class="chart-wrap-price"><canvas id="priceChart"></canvas></div>
+    </div>
+
+    <!-- 비교 그래프 -->
+    <div id="compare-section" style="display:none;">
+      <div class="sec-label" id="compare-section-label">비교 그래프</div>
+      <div class="nm-flat" style="padding:10px 14px;margin-bottom:12px;">
+        <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+          <input type="date" id="pr-cmp-from" style="padding:5px 8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:50px;color:var(--text-primary);flex:1;min-width:0;">
+          <span style="font-size:11px;color:var(--text-tertiary);flex-shrink:0;">~</span>
+          <input type="date" id="pr-cmp-to" style="padding:5px 8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:50px;color:var(--text-primary);flex:1;min-width:0;">
+          <button onclick="renderComparePriceChart()" style="padding:5px 12px;font-size:11px;font-family:'Noto Sans KR',sans-serif;font-weight:600;background:var(--text-primary);color:white;border:none;border-radius:50px;cursor:pointer;flex-shrink:0;">비교 조회</button>
+        </div>
+        <div class="chart-wrap-price"><canvas id="priceChartCmp"></canvas></div>
+      </div>
     </div>
   </div>
 </div>
@@ -3520,7 +3557,6 @@ function getSaveKey(tab){
 const TAB_DEFS = [
   {id:'smartfarm',        label:'메인',     icon:'🎛️'},
   {id:'smartfarm2',       label:'육묘',     icon:'🌿'},
-  {id:'prices',           label:'시세',     icon:'📈'},
   {id:'income',           label:'수입',     icon:'💰'},
   {id:'expense',          label:'지출',     icon:'💸'},
   {id:'loan',             label:'대출',     icon:'🏦'},
@@ -4781,6 +4817,32 @@ function cancelRepaidKey(key,oldKey,loanIdx){
 }
 
 /* ══ PRICES ══ */
+function openPriceModal() {
+  var modal = document.getElementById('priceModal');
+  if (modal) modal.style.display = 'flex';
+  // 날짜 자동 설정: 이번 달 1일 ~ 오늘
+  var now = new Date();
+  var pad = function(n){ return n<10?'0'+n:''+n; };
+  var y = now.getFullYear(), m = now.getMonth()+1, d = now.getDate();
+  var from = y+'-'+pad(m)+'-01';
+  var to   = y+'-'+pad(m)+'-'+pad(d);
+  var fromEl = document.getElementById('pr-from');
+  var toEl   = document.getElementById('pr-to');
+  if (fromEl) fromEl.value = from;
+  if (toEl)   toEl.value   = to;
+  // 비교 상태 초기화
+  _showCompare = false;
+  var sec = document.getElementById('compare-section');
+  var btn = document.getElementById('btn-compare');
+  if (sec) sec.style.display = 'none';
+  if (btn) { btn.style.background='var(--surface)'; btn.style.color='var(--text-secondary)'; btn.style.borderColor='var(--border)'; }
+  try { renderPriceChart(); } catch(e) {}
+}
+function closePriceModal() {
+  var modal = document.getElementById('priceModal');
+  if (modal) modal.style.display = 'none';
+}
+
 function renderPricesTab(){
   const d=document.getElementById('priceDate');
   if(d&&!d.value){const t=NOW;d.value=`${t.getFullYear()}-${p2(t.getMonth()+1)}-${p2(t.getDate())}`;}
@@ -6919,7 +6981,7 @@ function sf2Draw(id) {
   var label = names[id+'_label'] || id;
   SF2_ZONE_DEFS.forEach(function(z){ z.switches.forEach(function(sw){ if(sw.id===id && !names[id+'_label']) label=sw.defaultLabel; }); });
   if (!el.querySelector('.sf-track-wrap')) {
-    el.innerHTML = '<div class="sf-sw-num"></div><div class="sf-track-wrap"><div class="sf-track-bg"></div><div class="sf-track-txt txt-open">열기</div><div class="sf-track-txt txt-close">닫기</div><div class="sf-knob"><span class="sf-knob-txt">정지</span></div></div>';
+    el.innerHTML = '<div class="sf-sw-num"></div><div class="sf-track-wrap"><div class="sf-track-bg"></div><div class="sf-track-txt txt-open">열기</div><div class="sf-track-txt txt-close">닫기</div><div class="sf-knob"><span class="sf-knob-txt" style="display:none;">정지</span></div></div>';
   }
   el.className = 'sf-sw ' + st;
   el.querySelector('.sf-sw-num').textContent = label;
